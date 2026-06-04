@@ -1,35 +1,26 @@
 from ollama import chat
+from prompts import SCHEMA
 
-response = chat(
-    model='qwen3:4b',
-    messages=[
-        {
-            'role': 'user',
-            'content': '''
-Você é especialista em PostgreSQL.
 
-Tabelas:
 
-clientes(
-id,
-nome,
-cidade
-)
+def gerar_sql(pergunta):
 
-vendas(
-id,
-cliente_id,
-valor,
-data_venda
-)
+    prompt = f"""
+    {SCHEMA}
 
-Gere apenas SQL.
+    Pergunta:
+    {pergunta}
+    """
 
-Pergunta:
-Qual cliente possui maior faturamento?
-'''
-        }
-    ]
-)
+    response = chat(
+        model="qwen3:4b",
+        messages=[
+            {
+                "role": "user",
+                "content": prompt
+            }
+        ]
+    )
 
-print(response['message']['content'])
+    return response["message"]["content"]
+
