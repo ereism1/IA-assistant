@@ -1,27 +1,31 @@
-from llm import gerar_sql, gerar_resposta
+from fastapi import FastAPI
+from llm import gerar_sql
 from database import executar_sql
 from utils import limpar_sql
 
+app = FastAPI()
 
 
-pergunta = "Qual produto gerou maior faturamento?"
+@app.get("/")
+def home():
 
-sql = gerar_sql(pergunta)
-
-print("\nSQL GERADO:")
-print(sql)
-
-resultado = executar_sql(sql)
-
-print("\nRESULTADO BRUTO:")
-print(resultado)
-
-resposta = gerar_resposta(pergunta, resultado)
-
-print("\nRESPOSTA FINAL:")
-print(resposta)
+    return {
+        "status": "online",
+        "projeto": "Assistente SQL IA"
+    }
 
 
-sql = gerar_sql(pergunta)
+@app.post("/pergunta")
+def perguntar(pergunta: str):
 
-sql = limpar_sql(sql)
+    sql_bruto = gerar_sql(pergunta)
+
+    sql = limpar_sql(sql_bruto)
+
+    resultado = executar_sql(sql)
+
+    return {
+        "pergunta": pergunta,
+        "sql": sql,
+        "resultado": str(resultado)
+    }

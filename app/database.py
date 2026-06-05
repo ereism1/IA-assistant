@@ -10,9 +10,9 @@ engine = create_engine(
 
 def validar_sql(sql):
 
-    proibidos = [
-        "DELETE",
+    comandos_proibidos = [
         "DROP",
+        "DELETE",
         "UPDATE",
         "INSERT",
         "ALTER",
@@ -21,7 +21,7 @@ def validar_sql(sql):
 
     sql_upper = sql.upper()
 
-    for comando in proibidos:
+    for comando in comandos_proibidos:
 
         if comando in sql_upper:
             raise Exception(

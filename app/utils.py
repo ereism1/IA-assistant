@@ -1,6 +1,12 @@
+import re
+
 def limpar_sql(sql):
 
+    # remove blocos markdown
     sql = sql.replace("```sql", "")
     sql = sql.replace("```", "")
 
-    return sql.strip()
+    # remove espaços extras
+    sql = sql.strip()
+
+    return sql
