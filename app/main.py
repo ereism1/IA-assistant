@@ -1,10 +1,13 @@
 from fastapi import FastAPI
-from llm import gerar_sql
-from database import executar_sql
-from utils import limpar_sql
+from app.llm import gerar_sql
+from app.database import executar_sql, formatar_resultado
+from app.utils import limpar_sql
+from pydantic import BaseModel
 
 app = FastAPI()
 
+class PerguntaRequest(BaseModel):
+    pergunta: str
 
 @app.get("/")
 def home():
@@ -16,16 +19,20 @@ def home():
 
 
 @app.post("/pergunta")
-def perguntar(pergunta: str):
+def perguntar(req: PerguntaRequest):
 
-    sql_bruto = gerar_sql(pergunta)
+    sql_bruto = gerar_sql(req.pergunta)
 
     sql = limpar_sql(sql_bruto)
 
-    resultado = executar_sql(sql)
+    resultado_bruto = executar_sql(sql)
+    resultado = formatar_resultado(resultado_bruto)
 
     return {
-        "pergunta": pergunta,
-        "sql": sql,
-        "resultado": str(resultado)
+    "pergunta": req.pergunta,
+    "sql": sql,
+    "resultado": {
+        "produto": resultado[0],
+        "valor": float(resultado[1]) if len(resultado) > 1 else None
     }
+}

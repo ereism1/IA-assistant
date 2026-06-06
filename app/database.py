@@ -39,4 +39,11 @@ def executar_sql(sql):
 
         return resultado.fetchall()
     
-        
+def formatar_resultado(resultado):
+
+    if not resultado:
+        return None
+
+    linha = resultado[0]
+
+    return linha        

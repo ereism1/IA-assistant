@@ -1,8 +1,8 @@
 import time
 
-from llm import gerar_sql
-from database import executar_sql
-from utils import limpar_sql
+from app.llm import gerar_sql
+from app.database import executar_sql
+from app.utils import limpar_sql
 
 pergunta = input("Digite sua pergunta: ")
 

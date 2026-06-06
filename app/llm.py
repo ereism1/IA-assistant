@@ -1,5 +1,5 @@
 from ollama import chat
-from prompts import SCHEMA
+from app.prompts import SCHEMA
 
 def gerar_sql(pergunta):
 
