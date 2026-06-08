@@ -3,8 +3,18 @@ from app.llm import gerar_sql, gerar_resposta
 from app.database import executar_sql, formatar_resultado, salvar_historico, listar_historico, buscar_contexto
 from app.utils import limpar_sql
 from pydantic import BaseModel
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 historico = buscar_contexto(10)
 
