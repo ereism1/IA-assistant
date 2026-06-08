@@ -1,17 +1,22 @@
 from ollama import chat
 from app.prompts import SCHEMA
 
-def gerar_sql(pergunta):
+def gerar_sql(pergunta, contexto=""):
 
     prompt = f"""
-    {SCHEMA}
+     {SCHEMA}
 
-    Pergunta:
-    {pergunta}
-    """
+     Contexto da conversa:
+     {contexto}
+
+     Pergunta atual:
+     {pergunta}
+
+     Gere apenas SQL PostgreSQL.
+     """
 
     response = chat(
-        model="qwen3:4b",
+        model="qwen2.5:1.5b",
         messages=[
             {
                 "role": "user",
@@ -39,7 +44,7 @@ def gerar_resposta(pergunta, resultado):
     """
 
     response = chat(
-        model="qwen3:4b",
+        model="qwen2.5:1.5b",
         messages=[
             {
                 "role": "user",

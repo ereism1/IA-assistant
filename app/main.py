@@ -1,10 +1,21 @@
 from fastapi import FastAPI
-from app.llm import gerar_sql
-from app.database import executar_sql, formatar_resultado
+from app.llm import gerar_sql, gerar_resposta
+from app.database import executar_sql, formatar_resultado, salvar_historico, listar_historico, buscar_contexto
 from app.utils import limpar_sql
 from pydantic import BaseModel
 
 app = FastAPI()
+
+historico = buscar_contexto(10)
+
+contexto = ""
+
+for item in historico:
+
+    contexto += f"""
+Pergunta: {item[0]}
+Resposta: {item[1]}
+"""
 
 class PerguntaRequest(BaseModel):
     pergunta: str
@@ -21,18 +32,55 @@ def home():
 @app.post("/pergunta")
 def perguntar(req: PerguntaRequest):
 
-    sql_bruto = gerar_sql(req.pergunta)
+    try:
 
-    sql = limpar_sql(sql_bruto)
+        sql_bruto = gerar_sql(req.pergunta, contexto)
 
-    resultado_bruto = executar_sql(sql)
-    resultado = formatar_resultado(resultado_bruto)
+        sql = limpar_sql(sql_bruto)
+
+        print("\n====================")
+        print("PERGUNTA:")
+        print(req.pergunta)
+        print("\nSQL GERADA:")
+        print(sql)
+        print("====================\n")
+
+        resultado_bruto = executar_sql(sql)
+
+        resultado = formatar_resultado(resultado_bruto)
+
+        resposta_ia = gerar_resposta(
+               req.pergunta,
+               resultado
+         )
+
+        salvar_historico(
+               req.pergunta,
+               sql,
+               resposta_ia
+         )
+
+        return {
+            "status": "sucesso",
+            "pergunta": req.pergunta,
+            "sql": sql,
+            "resultado": resultado,
+	    "resposta": resposta_ia
+        }
+
+    except Exception as e:
+
+        return {
+            "status": "erro",
+            "pergunta": req.pergunta,
+            "sql": sql if "sql" in locals() else None,
+            "erro": str(e)
+        }
+
+@app.get("/historico")
+def historico():
 
     return {
-    "pergunta": req.pergunta,
-    "sql": sql,
-    "resultado": {
-        "produto": resultado[0],
-        "valor": float(resultado[1]) if len(resultado) > 1 else None
+        "status": "sucesso",
+        "historico": listar_historico()
     }
-}

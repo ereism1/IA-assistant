@@ -41,9 +41,75 @@ def executar_sql(sql):
     
 def formatar_resultado(resultado):
 
+
     if not resultado:
-        return None
+        return []
 
-    linha = resultado[0]
+    return [
+        dict(linha._mapping)
+        for linha in resultado
+    ]
 
-    return linha        
+def salvar_historico(pergunta, sql, resposta):
+
+    with engine.connect() as conn:
+
+        conn.execute(
+            text("""
+                INSERT INTO historico_consultas
+                (
+                    pergunta,
+                    sql_gerada,
+                    resposta_ia
+                )
+                VALUES
+                (
+                    :pergunta,
+                    :sql,
+                    :resposta
+                )
+            """),
+            {
+                "pergunta": pergunta,
+                "sql": sql,
+                "resposta": resposta
+            }
+        )
+
+        conn.commit()
+
+def listar_historico():
+
+    with engine.connect() as conn:
+
+        resultado = conn.execute(
+            text("""
+                SELECT
+                    id,
+                    pergunta,
+                    sql_gerada,
+                    resposta_ia,
+                    data_consulta
+                FROM historico_consultas
+                ORDER BY data_consulta DESC
+                LIMIT 100
+            """)
+        )
+
+        return [
+            dict(row._mapping)
+            for row in resultado
+        ]
+
+def buscar_contexto(limite=5):
+
+    with engine.connect() as conn:
+
+        resultado = conn.execute(text("""
+            SELECT pergunta, resposta_ia
+            FROM historico_consultas
+            ORDER BY id DESC
+            LIMIT :limite
+        """), {"limite": limite})
+
+        return resultado.fetchall()
